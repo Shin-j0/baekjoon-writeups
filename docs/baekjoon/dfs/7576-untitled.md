@@ -1,0 +1,178 @@
+---
+title: "토마토"
+boj: 7576
+tier: "GOLD 5"
+algorithms: "BFS,DFS"
+date: "2025-12-28"
+---
+
+ [https://www.acmicpc.net/problem/7576](https://www.acmicpc.net/problem/7576)
+
+
+## 문제
+
+
+철수의 토마토 농장에서는 토마토를 보관하는 큰 창고를 가지고 있다. 토마토는 아래의 그림과 같이 격자 모양 상자의 칸에 하나 씩 넣어서 창고에 보관한다.
+
+
+![Screen%20Shot%202021-06-22%20at%202.41.22%20PM.png](https://u.acmicpc.net/de29c64f-dee7-4fe0-afa9-afd6fc4aad3a/Screen%20Shot%202021-06-22%20at%202.41.22%20PM.png)
+
+
+창고에 보관되는 토마토들 중에는 잘 익은 것도 있지만, 아직 익지 않은 토마토들도 있을 수 있다. 보관 후 하루가 지나면, 익은 토마토들의 인접한 곳에 있는 익지 않은 토마토들은 익은 토마토의 영향을 받아 익게 된다. 하나의 토마토의 인접한 곳은 왼쪽, 오른쪽, 앞, 뒤 네 방향에 있는 토마토를 의미한다. 대각선 방향에 있는 토마토들에게는 영향을 주지 못하며, 토마토가 혼자 저절로 익는 경우는 없다고 가정한다. 철수는 창고에 보관된 토마토들이 며칠이 지나면 다 익게 되는지, 그 최소 일수를 알고 싶어 한다.
+
+
+토마토를 창고에 보관하는 격자 모양의 상자들의 크기와 익은 토마토들과 익지 않은 토마토들의 정보가 주어졌을 때, 며칠이 지나면 토마토들이 모두 익는지, 그 최소 일수를 구하는 프로그램을 작성하라. 단, 상자의 일부 칸에는 토마토가 들어있지 않을 수도 있다.
+
+
+## 입력
+
+
+첫 줄에는 상자의 크기를 나타내는 두 정수 M, N이 주어진다. M은 상자의 가로 칸의 수, N은 상자의 세로 칸의 수를 나타낸다. 단, 2 ≤ M, N ≤ 1,000 이다. 둘째 줄부터는 하나의 상자에 저장된 토마토들의 정보가 주어진다. 즉, 둘째 줄부터 N개의 줄에는 상자에 담긴 토마토의 정보가 주어진다. 하나의 줄에는 상자 가로 줄에 들어있는 토마토의 상태가 M개의 정수로 주어진다. 정수 1은 익은 토마토, 정수 0은 익지 않은 토마토, 정수 -1은 토마토가 들어있지 않은 칸을 나타낸다.
+
+
+토마토가 하나 이상 있는 경우만 입력으로 주어진다.
+
+
+## 출력
+
+
+여러분은 토마토가 모두 익을 때까지 의 최소 날짜를 출력해야 한다. 만약, 저장될 때부터 모든 토마토가 익어있는 상태이면 0을 출력해야 하고, 토마토가 모두 익지는 못하는 상황이면 -1을 출력해야 한다.
+
+
+## 예제 입력 1 
+
+
+```plain text
+6 4
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 1
+```
+
+
+## 예제 출력 1 
+
+
+```plain text
+8
+```
+
+
+## 해결 방법
+
+
+STL 알고리즘 queue 를 활용,  BFS으로 너비 우선 탐색 실시 
+
+
+너비 탐색 우선 : 탐색 시작 지점과 가까운 자료들을 우선 탐색
+
+
+## 알고리즘
+
+1. 익은 토마토의 좌표를 큐1에 삽입
+2. 큐 1 의 원소 pop 후 해당 좌표 주변의 토마토를 익은 토마토로 변경 후 다시 큐2에 삽입
+3. 큐 2를 큐 1에 저장
+4. 모든 토마토를 탐색 완료했다면 종료
+
+![KakaoTalk_20250707_205652425.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/f6dab810-ded1-4828-bfb2-eef9b115ca70/04b55dcf-7827-4fcf-9416-e8d562092a1d/KakaoTalk_20250707_205652425.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466V2RZK6X7%2F20251230%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20251230T183927Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEO7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQC1UaxGUiVOOD0XYPSrS9YEHxWyyjWb2IEYT%2B28U6s5%2FQIgOqX84D7Xt9eoEXqhJ228JgfCNNMmkK9Df%2BnlicrKGksqiAQIt%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDEiCRqzRDR0ZzWPkNCrcAw%2B0xFMzY293klSpur2Or1rEcDTzGo4bQbAb2%2FzqjAT2zUhJ%2FUXAowpM%2F5sWZqjyrPAnl%2Bxr%2BCkygaIKLd1a9wwwO6nuPg73OELqM7hKUbHCitnNPjD0yij9jk8GTLgelNMKGEHAOnNJBBJ3rVNLOUfRdChVJo%2FiaRA2HzYqIM0lKuJwRRMRoPGIA%2FEASGOgs9gsfgWQe%2FEN1ICF1Eo%2Fl7LgF6QyYrFXvoHH8eeVrJ0nZv1f%2FEsq1hBvqGx5lIlzOd4F57FKKBAhaUWgvdxTlAOj4IDyIS5V%2Fdd7m57%2Fp5neRdbBjVw%2B1nFy%2B0krt3XuSlvxGksfdnQ5sypzMAEl2WRHZ9HieXOXb85QOSOBBLhkSqAuJO0vTqsuYvLH6HhVbvHSP8jyFTvz%2BRbcJperyMGXdabUyv8VuZmgL1CRO1AJMEpSXp8RMRBsuL07hH4pX8r2%2B4DUL9zOpwtm1cRRicA%2B8hEL17Z9C5DUqRcgKVLxGI7rSyEr52N8fGTKsMDRBOyLhGaNazFwk3nF8mHU6l86aRdUtjmz8Oc1jjEfZINl0huHp7VCNdqe9qeZMwyiChtek5eRAGdz6npc16vy9OOg10mozmonla3NThDSv6N8N1nqt7W3x7j%2FC9SiMMCyz8oGOqUB0EF45KTew1euFV%2B121NciNuWaA3MGJS%2BRP6CELsxFvDuAA4FTIkAYqzi7JrV33a0qT1dAjfqklDzdP6MGaSliMwzjmYgWseFz8CqcBZIaMsBs%2F1yOneWFupi5r5q0TwtgB3XFJlbhNoW8IZEGzwjWl2tncaTTtRKRR%2BHoRQZ14dTXgBMYxuhXFl3RZy0oxqhkjeq4V0SsDMPTKayBEo72ekkbEMh&X-Amz-Signature=9b071e324f720c65dd77914b5830c3ebd3e8933b0db555856305a257e678b7fc&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject)
+
+
+## 코드
+
+
+```c++
+#include<iostream>
+#include<algorithm>
+#include<queue>
+
+using namespace std;
+class spot{
+public:
+	int x,y;
+	spot(): x{x}, y{y}{}
+	spot(const spot & s){
+		x = s.x;
+		y = s.y;
+	}
+	void set(int x,int y){
+		this->x = x;
+		this->y = y;
+	}
+	void Print(){
+		cout << "( " << x << ", "<< y << ")" << endl;
+	}
+};
+int **Array;
+int width,length;
+
+bool check_index(spot index){
+	if((index.x >= 0 && index.x < width) && (index.y >= 0 && index.y < length))
+		return 1;
+	return 0;
+}
+
+
+int main(void){
+	queue<spot> que1;
+	queue<spot> que2;
+	spot temp, temp_arr[4];
+	int index[4][2] = { {1,0},{-1,0},{0,1},{0,-1} };
+
+
+	int value;
+
+	cin >> width >> length;
+	Array = new int*[length];
+	for(int i=0; i<length; ++i)
+	    Array[i] = new int[width];
+
+	int max_count = width * length, count = 0;
+	int result = 0;
+
+	for(int y = 0; y<length; ++y){
+		for(int x = 0; x<width; ++x){
+			cin >> value;
+			Array[y][x] = value;
+			if(value==0) continue;
+			if(value==1){
+				temp.set(x,y);
+				que1.push(temp);
+			}
+			max_count--;
+		}
+	}
+
+	while(max_count > count){
+		if(que1.empty()){
+			cout << -1 << endl;
+			return 0;
+		}
+		//cout << max_count << " " << count << endl;
+		result ++;
+		while(!que1.empty()){
+			temp = que1.front();
+			//temp.Print();
+
+			for(int i=0;i<4;++i){
+				temp_arr[i].set(temp.x + index[i][0],temp.y + index[i][1]);
+				//temp_arr[i].Print();
+				if(check_index(temp_arr[i]) && Array[temp_arr[i].y][temp_arr[i].x] == 0) {
+					Array[temp_arr[i].y][temp_arr[i].x] = 1;
+					count ++;
+					que2.push(temp_arr[i]);
+				}
+			}
+
+			que1.pop();
+		}
+		que1 = que2;
+		while(!que2.empty())
+			que2.pop();
+	}
+	cout << result << endl;
+
+}
+```
+
+
