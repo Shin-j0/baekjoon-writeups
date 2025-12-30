@@ -117,7 +117,7 @@ async function main() {
     stats.latest.push({ boj, title, tier, algos: algoList, date });
 
     const list = algos.length ? algos : ["etc"];
-    const filename = `${boj ?? "unknown"}-${safeSlug(title)}.md`;
+    const filename = `${boj ?? "unknown"}.md`;
 
     for (const a of list) {
       const dir = path.join(OUT_ROOT, algoFolder(a));
