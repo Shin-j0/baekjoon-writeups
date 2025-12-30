@@ -15,15 +15,17 @@ if (!NOTION_TOKEN || !NOTION_DATABASE_ID) {
 const notion = new Client({ auth: NOTION_TOKEN });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
-const OUT_ROOT = path.join(process.cwd(), "docs", "baekjoon");
+const ROOT = path.join(process.cwd(), "docs", "baekjoon");
+const PROBLEMS_DIR = path.join(ROOT, "problems");
 const README_PATH = path.join(process.cwd(), "README.md");
 
+// Notion DB 컬럼명(네 DB 기준)
 const COL = {
   number: "문제번호",
   tier: "Select",
   algos: "알고리즘",
   published: "Published",
-  date: "날짜"
+  date: "날짜",
 };
 
 const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
@@ -31,21 +33,68 @@ const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
 function getTitle(page) {
   for (const key of Object.keys(page.properties)) {
     const p = page.properties[key];
-    if (p.type === "title") return (p.title?.map(t => t.plain_text).join("") || "untitled").trim();
+    if (p.type === "title") {
+      return (p.title?.map((t) => t.plain_text).join("") || "untitled").trim();
+    }
   }
   return "untitled";
 }
-const getNumber = (page, k) => page.properties?.[k]?.type === "number" ? page.properties[k].number : null;
-const getSelect = (page, k) => page.properties?.[k]?.type === "select" ? page.properties[k].select?.name ?? null : null;
-const getMulti = (page, k) => page.properties?.[k]?.type === "multi_select" ? page.properties[k].multi_select.map(x=>x.name) : [];
-const getCheck = (page, k) => page.properties?.[k]?.type === "checkbox" ? !!page.properties[k].checkbox : false;
-const getDate = (page, k) => page.properties?.[k]?.type === "date" ? page.properties[k].date?.start ?? null : null;
 
-const yamlValue = (v) => (v === null || v === undefined) ? "null" :
-  (typeof v === "boolean" || typeof v === "number") ? String(v) : JSON.stringify(String(v));
+const getNumber = (page, k) =>
+  page.properties?.[k]?.type === "number" ? page.properties[k].number : null;
+
+const getSelect = (page, k) =>
+  page.properties?.[k]?.type === "select"
+    ? page.properties[k].select?.name ?? null
+    : null;
+
+const getMulti = (page, k) =>
+  page.properties?.[k]?.type === "multi_select"
+    ? page.properties[k].multi_select.map((x) => x.name)
+    : [];
+
+const getCheck = (page, k) =>
+  page.properties?.[k]?.type === "checkbox" ? !!page.properties[k].checkbox : false;
+
+const getDate = (page, k) =>
+  page.properties?.[k]?.type === "date" ? page.properties[k].date?.start ?? null : null;
+
+const yamlValue = (v) =>
+  v === null || v === undefined
+    ? "null"
+    : typeof v === "boolean" || typeof v === "number"
+      ? String(v)
+      : JSON.stringify(String(v));
 
 const algoFolder = (a) => slugify(a, { lower: true, strict: true }) || "etc";
-const safeSlug = (t) => slugify(t, { lower: true, strict: true }) || "untitled";
+
+// 티어 정렬용 점수(큰 값이 더 상위)
+function tierScore(tier) {
+  if (!tier) return -1;
+
+  // 예: "GOLD 5"
+  const parts = String(tier).trim().split(/\s+/);
+  if (parts.length < 2) return -1;
+
+  const name = parts[0].toUpperCase();
+  const level = Number(parts[1]);
+
+  const baseMap = {
+    BRONZE: 200,
+    SILVER: 300,
+    GOLD: 400,
+    PLATINUM: 500,
+    DIAMOND: 600,
+    RUBY: 700, // 혹시 생기면
+  };
+
+  const base = baseMap[name] ?? 0;
+  if (!base || !Number.isFinite(level)) return -1;
+
+  // 1이 가장 높고 5가 가장 낮게 보이도록 (같은 티어 내)
+  // GOLD 1 > GOLD 2 > ... > GOLD 5
+  return base + (6 - level);
+}
 
 async function queryPublishedPages() {
   const results = [];
@@ -57,7 +106,7 @@ async function queryPublishedPages() {
       start_cursor: cursor,
       page_size: 100,
       filter: { property: COL.published, checkbox: { equals: true } },
-      sorts: [{ timestamp: "last_edited_time", direction: "descending" }]
+      sorts: [{ timestamp: "last_edited_time", direction: "descending" }],
     });
 
     results.push(...resp.results);
@@ -65,6 +114,32 @@ async function queryPublishedPages() {
     cursor = resp.next_cursor;
   }
   return results;
+}
+
+/**
+ * README에서 자동 영역만 갱신(전체 덮어쓰기 X)
+ * - 마커가 있으면 그 사이만 교체
+ * - 마커가 없으면 맨 아래에 블록 추가
+ */
+function upsertAutoSection(readmePath, autoContent) {
+  const start = "<!-- AUTO-GENERATED:START -->";
+  const end = "<!-- AUTO-GENERATED:END -->";
+  const block = `${start}\n${autoContent}\n${end}`;
+
+  let cur = "";
+  try {
+    cur = fs.readFileSync(readmePath, "utf8");
+  } catch {
+    fs.writeFileSync(readmePath, `# baekjoon-writeups\n\n${block}\n`, "utf8");
+    return;
+  }
+
+  if (cur.includes(start) && cur.includes(end)) {
+    const updated = cur.replace(new RegExp(`${start}[\\s\\S]*?${end}`), block);
+    fs.writeFileSync(readmePath, updated, "utf8");
+  } else {
+    fs.writeFileSync(readmePath, `${cur}\n\n${block}\n`, "utf8");
+  }
 }
 
 async function buildMarkdown(page) {
@@ -82,99 +157,166 @@ async function buildMarkdown(page) {
     `algorithms: ${yamlValue(algos)}`,
     `date: ${yamlValue(date)}`,
     "---",
-    ""
+    "",
   ].join("\n");
 
   const mdBlocks = await n2m.pageToMarkdown(page.id);
   const md = n2m.toMarkdownString(mdBlocks)?.parent ?? "";
+
   return { title, boj, tier, date, algos, content: fm + md + "\n" };
 }
 
-async function main() {
-  ensureDir(OUT_ROOT);
+function toTable(header, rows) {
+  return [header, ...rows].join("\n");
+}
 
-  const pages = await queryPublishedPages();
-  if (pages.length === 0) return console.log("No Published pages found.");
-  const stats = {
-    total: 0,
-    byAlgo: new Map(),
-    byTier: new Map(),
-    latest: []
-  };
-  for (const page of pages) {
-    if (!getCheck(page, COL.published)) continue;
-    const { title, boj, tier, date, algos, content } = await buildMarkdown(page);
-    stats.total++;
+function safeBojStr(boj) {
+  if (boj === null || boj === undefined) return "unknown";
+  return String(boj);
+}
 
-    if (tier) stats.byTier.set(tier, (stats.byTier.get(tier) ?? 0) + 1);
-
-    const algoList = algos.length ? algos : ["etc"];
-    for (const a of algoList) {
-      stats.byAlgo.set(a, (stats.byAlgo.get(a) ?? 0) + 1);
-    }
-
-    // 최신 10개만 저장
-    stats.latest.push({ boj, title, tier, algos: algoList, date });
-
-    const list = algos.length ? algos : ["etc"];
-    const filename = `${boj ?? "unknown"}.md`;
-
-    for (const a of list) {
-      const dir = path.join(OUT_ROOT, algoFolder(a));
-      ensureDir(dir);
-      fs.writeFileSync(path.join(dir, filename), content, "utf8");
-    }
-    console.log(`✓ ${boj} ${title} -> ${list.join(", ")}`);
-  }
-    // 최신순 정렬(날짜 없으면 뒤로)
-  stats.latest.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
-  stats.latest = stats.latest.slice(0, 10);
+function makeReadmeAuto(stats) {
+  const tierRows = [...stats.byTier.entries()]
+    .sort((a, b) => tierScore(b[0]) - tierScore(a[0]))
+    .map(([tier, cnt]) => `| ${tier} | ${cnt} |`);
 
   const algoRows = [...stats.byAlgo.entries()]
     .sort((a, b) => b[1] - a[1])
-    .map(([algo, cnt]) => `| ${algo} | ${cnt} |`)
-    .join("\n");
+    .map(([algo, cnt]) => `| ${algo} | ${cnt} |`);
 
-  const tierRows = [...stats.byTier.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([tier, cnt]) => `| ${tier} | ${cnt} |`)
-    .join("\n");
+  const latestRows = stats.latest.map((x) => {
+    const bojStr = safeBojStr(x.boj);
+    const problemLink = x.boj ? `https://www.acmicpc.net/problem/${x.boj}` : null;
 
-  const latestRows = stats.latest
-    .map(x => {
-      const file = `${x.boj ?? "unknown"}-${safeSlug(x.title)}.md`;
-      const firstAlgo = x.algos?.[0] ?? "etc";
-      const linkPath = `docs/baekjoon/${algoFolder(firstAlgo)}/${file}`;
-      const algostr = (x.algos ?? []).join(", ");
-      return `| [${x.boj}](${`https://www.acmicpc.net/problem/${x.boj}`}) | [${x.title}](${linkPath}) | ${x.tier ?? ""} | ${algostr} | ${x.date ?? ""} |`;
-    })
-    .join("\n");
+    const bojCell = problemLink ? `[${bojStr}](${problemLink})` : bojStr;
+    const titleCell = `[${x.title}](docs/baekjoon/problems/${bojStr}.md)`;
+    const algostr = (x.algos ?? []).join(", ");
 
-  const readme = `# baekjoon-writeups
+    return `| ${bojCell} | ${titleCell} | ${x.tier ?? ""} | ${algostr} | ${x.date ?? ""} |`;
+  });
 
-Notion에 정리한 백준 풀이를 GitHub로 자동 동기화합니다.  
-(✅ Published 체크된 항목만 반영)
+  const tierTable = toTable(
+    `### By Tier
+| Tier | Count |
+|---|---:|`,
+    tierRows.length ? tierRows : ["| - | 0 |"]
+  );
 
+  const algoTable = toTable(
+    `### By Algorithm
+| Algorithm | Count |
+|---|---:|`,
+    algoRows.length ? algoRows : ["| - | 0 |"]
+  );
+
+  const latestTable = toTable(
+    `## Latest (Top 10)
+| BOJ | Write-up | Tier | Algorithms | Date |
+|---:|---|---|---|---|`,
+    latestRows.length ? latestRows : ["| - | - | - | - | - |"]
+  );
+
+  return `
 ## Stats
 - Total published: **${stats.total}**
 
-### By Tier
-| Tier | Count |
-|---|---:|
-${tierRows || "| - | 0 |"}
+${tierTable}
 
-### By Algorithm
-| Algorithm | Count |
-|---|---:|
-${algoRows || "| - | 0 |"}
+${algoTable}
 
-## Latest (Top 10)
-| BOJ | Write-up | Tier | Algorithms | Date |
-|---:|---|---|---|---|
-${latestRows || "| - | - | - | - | - |"}
+${latestTable}
+`.trim();
+}
+
+function makeAlgoIndex(algoName, entries) {
+  // entries: [{boj,title,tier,date}]
+  // 최신순(날짜)
+  const sorted = [...entries].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+
+  const rows = sorted.map((x) => {
+    const bojStr = safeBojStr(x.boj);
+    const problemLink = x.boj ? `https://www.acmicpc.net/problem/${x.boj}` : null;
+
+    const bojCell = problemLink ? `[${bojStr}](${problemLink})` : bojStr;
+    const titleCell = `[${x.title}](../problems/${bojStr}.md)`;
+
+    return `| ${bojCell} | ${titleCell} | ${x.tier ?? ""} | ${x.date ?? ""} |`;
+  });
+
+  return `# ${algoName}
+
+| BOJ | Title | Tier | Date |
+|---:|---|---|---|
+${rows.length ? rows.join("\n") : "| - | - | - | - |"}
 `;
+}
 
-  fs.writeFileSync(README_PATH, readme, "utf8");
+async function main() {
+  ensureDir(ROOT);
+  ensureDir(PROBLEMS_DIR);
+
+  const pages = await queryPublishedPages();
+
+  // 통계 + 인덱스용 데이터
+  const stats = {
+    total: 0,
+    byAlgo: new Map(), // algo -> count
+    byTier: new Map(), // tier -> count
+    latest: [], // {boj,title,tier,algos,date}
+  };
+
+  const algoEntries = new Map(); // algo -> [{boj,title,tier,date}]
+
+  if (pages.length === 0) {
+    console.log("No Published pages found.");
+    upsertAutoSection(README_PATH, makeReadmeAuto(stats));
+    return;
+  }
+
+  for (const page of pages) {
+    if (!getCheck(page, COL.published)) continue;
+
+    const { title, boj, tier, date, algos, content } = await buildMarkdown(page);
+
+    const bojStr = safeBojStr(boj);
+    const algoList = (algos && algos.length) ? algos : ["etc"];
+
+    // 1) problems/에 딱 한 번만 저장
+    const problemPath = path.join(PROBLEMS_DIR, `${bojStr}.md`);
+    fs.writeFileSync(problemPath, content, "utf8");
+
+    // 2) 통계 집계
+    stats.total++;
+    if (tier) stats.byTier.set(tier, (stats.byTier.get(tier) ?? 0) + 1);
+
+    for (const a of algoList) {
+      stats.byAlgo.set(a, (stats.byAlgo.get(a) ?? 0) + 1);
+
+      if (!algoEntries.has(a)) algoEntries.set(a, []);
+      algoEntries.get(a).push({ boj, title, tier, date });
+    }
+
+    // 3) 최신 목록
+    stats.latest.push({ boj, title, tier, algos: algoList, date });
+
+    console.log(`✓ ${bojStr} ${title} -> ${algoList.join(", ")}`);
+  }
+
+  // 최신 10개 (날짜 기준)
+  stats.latest.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+  stats.latest = stats.latest.slice(0, 10);
+
+  // README 자동영역 갱신
+  upsertAutoSection(README_PATH, makeReadmeAuto(stats));
+
+  // 알고리즘별 index.md 생성
+  for (const [algo, entries] of algoEntries.entries()) {
+    const dir = path.join(ROOT, algoFolder(algo));
+    ensureDir(dir);
+    const indexPath = path.join(dir, "index.md");
+    fs.writeFileSync(indexPath, makeAlgoIndex(algo, entries), "utf8");
+  }
+
   console.log("Done.");
 }
 
