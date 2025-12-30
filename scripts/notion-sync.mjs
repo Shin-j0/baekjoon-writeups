@@ -17,7 +17,6 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
 
 const OUT_ROOT = path.join(process.cwd(), "docs", "baekjoon");
 
-// 너 DB 컬럼명 기준(스크린샷 그대로)
 const COL = {
   number: "문제번호",
   tier: "Select",
@@ -81,7 +80,6 @@ async function buildMarkdown(page) {
     `tier: ${yamlValue(tier)}`,
     `algorithms: ${yamlValue(algos)}`,
     `date: ${yamlValue(date)}`,
-    `notion_id: ${yamlValue(page.id)}`,
     "---",
     ""
   ].join("\n");
