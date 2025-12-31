@@ -36,23 +36,24 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 ---
 
 ## 📂 Repository Structure
-📦 repo
-┣ 📂 docs/baekjoon
-┃ ┣ 📂 problems # BOJ 번호별 write-up
-┃ ┃ ┣ 2667.md
-┃ ┃ ┗ ...
-┃ ┣ 📂 bfs # 알고리즘별 인덱스
-┃ ┃ ┗ index.md
-┃ ┣ 📂 dfs
-┃ ┃ ┗ index.md
-┃ ┣ 📂 dp
-┃ ┃ ┗ index.md
-┃ ┗ ...
-┣ 📂 scripts
-┃ ┗ notion-sync.mjs # Notion → Markdown 변환 스크립트
-┣ 📂 .github/workflows
-┃ ┗ notion-sync.yml # 자동 커밋 파이프라인
-┗ 📜 README.md
+
+'''📦 repo
+'''┣ 📂 docs/baekjoon
+'''┃ ┣ 📂 problems # BOJ 번호별 write-up
+'''┃ ┃ ┣ 2667.md
+'''┃ ┃ ┗ ...
+'''┃ ┣ 📂 bfs # 알고리즘별 인덱스
+'''┃ ┃ ┗ index.md
+'''┃ ┣ 📂 dfs
+'''┃ ┃ ┗ index.md
+'''┃ ┣ 📂 dp
+'''┃ ┃ ┗ index.md
+'''┃ ┗ ...
+'''┣ 📂 scripts
+'''┃ ┗ notion-sync.mjs # Notion → Markdown 변환 스크립트
+'''┣ 📂 .github/workflows
+'''┃ ┗ notion-sync.yml # 자동 커밋 파이프라인
+'''┗ 📜 README.md
 
 ---
 
