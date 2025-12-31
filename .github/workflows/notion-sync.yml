@@ -28,6 +28,8 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          CODE_REPO_URL: "https://github.com/Shin-j0/baekjoon-solutions"
+          CODE_REPO_BRANCH: "main"
         run: npm run sync:notion
 
       - name: Commit & Push
