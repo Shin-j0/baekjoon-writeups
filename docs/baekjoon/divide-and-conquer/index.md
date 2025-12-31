@@ -1,5 +1,5 @@
 # Divide and Conquer
 
-| BOJ | Title | Tier | Algorithms | Date |
+| BOJ | Title | Tier | Code | Date |
 |---:|---|---|---|---|
-| [2630](https://www.acmicpc.net/problem/2630) | [색종이 만들기](../problems/2630.md) | SILVER 2 | Divide and Conquer | 2025-12-23 |
+| [2630](https://www.acmicpc.net/problem/2630) | [색종이 만들기](../problems/2630.md) | SILVER 2 | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/divide-and-conquer/2630.cpp) | 2025-12-23 |
