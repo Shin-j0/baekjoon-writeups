@@ -117,29 +117,29 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 ### By Algorithm
 | Algorithm | Count |
 |---|---:|
-| DFS | 7 |
 | BFS | 7 |
+| DFS | 7 |
 | Priority Queue | 3 |
 | Heap | 2 |
+| Map | 1 |
 | Que | 1 |
 | Deque | 1 |
-| Map | 1 |
-| Divide and Conquer | 1 |
-| Binary Search | 1 |
-| DP | 1 |
 | Greedy | 1 |
+| Divide and Conquer | 1 |
+| DP | 1 |
+| Binary Search | 1 |
 
 ## Latest (Top 10)
 | BOJ | Write-up | Tier | Algorithms | Code | Date |
 |---:|---|---|---|---|---|
-| [11729](https://www.acmicpc.net/problem/11729) | [절대값 힙](docs/baekjoon/problems/11729.md) | SILVER 1 | Heap, Priority Queue | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/11729.cpp) | 2025-12-30 |
 | [10026](https://www.acmicpc.net/problem/10026) | [적록색약](docs/baekjoon/problems/10026.md) | GOLD 5 | BFS, DFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/10026.cpp) | 2025-12-30 |
+| [11729](https://www.acmicpc.net/problem/11729) | [절대값 힙](docs/baekjoon/problems/11729.md) | SILVER 1 | Heap, Priority Queue | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/11729.cpp) | 2025-12-30 |
 | [11279](https://www.acmicpc.net/problem/11279) | [최대 힙](docs/baekjoon/problems/11279.md) | SILVER 2 | Heap, Priority Queue | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/11279.cpp) | 2025-12-29 |
 | [7662](https://www.acmicpc.net/problem/7662) | [이중 우선순위 큐](docs/baekjoon/problems/7662.md) | GOLD 4 | Priority Queue, Map | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/7662.cpp) | 2025-12-28 |
 | [7576](https://www.acmicpc.net/problem/7576) | [토마토](docs/baekjoon/problems/7576.md) | GOLD 5 | BFS, DFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/7576.cpp) | 2025-12-28 |
 | [7569](https://www.acmicpc.net/problem/7569) | [토마토](docs/baekjoon/problems/7569.md) | GOLD 5 | BFS, DFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/7569.cpp) | 2025-12-28 |
 | [5430](https://www.acmicpc.net/problem/5430) | [AC](docs/baekjoon/problems/5430.md) | GOLD 5 | Que, Deque | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/5430.cpp) | 2025-12-27 |
-| [14940](https://www.acmicpc.net/problem/14940) | [쉬운 최단 거리](docs/baekjoon/problems/14940.md) | SILVER 1 | DFS, BFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/14940.cpp) | 2025-12-27 |
 | [1931](https://www.acmicpc.net/problem/1931) | [회의실 배정](docs/baekjoon/problems/1931.md) | GOLD 5 | Greedy | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/1931.cpp) | 2025-12-27 |
+| [14940](https://www.acmicpc.net/problem/14940) | [쉬운 최단 거리](docs/baekjoon/problems/14940.md) | SILVER 1 | DFS, BFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/14940.cpp) | 2025-12-27 |
 | [2667](https://www.acmicpc.net/problem/2667) | [단지번호붙이기](docs/baekjoon/problems/2667.md) | SILVER 1 | DFS, BFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/2667.cpp) | 2025-12-26 |
 <!-- AUTO-GENERATED:END -->
