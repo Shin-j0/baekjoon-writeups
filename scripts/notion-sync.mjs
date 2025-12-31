@@ -12,6 +12,10 @@ if (!NOTION_TOKEN || !NOTION_DATABASE_ID) {
   process.exit(1);
 }
 
+// ✅ 코드 레포 링크 자동 생성용 (workflow env로 주는 걸 추천)
+const CODE_REPO_URL = (process.env.CODE_REPO_URL || "").replace(/\/$/, "");
+const CODE_REPO_BRANCH = process.env.CODE_REPO_BRANCH || "main";
+
 const notion = new Client({ auth: NOTION_TOKEN });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
@@ -26,6 +30,9 @@ const COL = {
   algos: "알고리즘",
   published: "Published",
   date: "날짜",
+
+  // ✅ (옵션) Notion에 직접 코드 링크를 넣고 싶으면 URL 타입으로 추가
+  codeUrl: "Code URL",
 };
 
 const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
@@ -59,6 +66,9 @@ const getCheck = (page, k) =>
 const getDate = (page, k) =>
   page.properties?.[k]?.type === "date" ? page.properties[k].date?.start ?? null : null;
 
+const getUrl = (page, k) =>
+  page.properties?.[k]?.type === "url" ? page.properties[k].url ?? null : null;
+
 const yamlValue = (v) =>
   v === null || v === undefined
     ? "null"
@@ -71,8 +81,6 @@ const algoFolder = (a) => slugify(a, { lower: true, strict: true }) || "etc";
 // 티어 정렬용 점수(큰 값이 더 상위)
 function tierScore(tier) {
   if (!tier) return -1;
-
-  // 예: "GOLD 5"
   const parts = String(tier).trim().split(/\s+/);
   if (parts.length < 2) return -1;
 
@@ -91,13 +99,7 @@ function tierScore(tier) {
   const base = baseMap[name] ?? 0;
   if (!base || !Number.isFinite(level)) return -1;
 
-  // 1이 가장 높고 5가 가장 낮게 보이도록 (같은 티어 내)
   return base + (6 - level);
-}
-
-// date가 있으면 date, 없으면 lastEdited로 정렬
-function sortKey(x) {
-  return x?.date ?? x?.lastEdited ?? "";
 }
 
 async function queryPublishedPages() {
@@ -144,6 +146,42 @@ function upsertAutoSection(readmePath, autoContent) {
   }
 }
 
+function toTable(header, rows) {
+  return [header, ...rows].join("\n");
+}
+
+function safeBojStr(boj) {
+  if (boj === null || boj === undefined) return "unknown";
+  return String(boj);
+}
+
+// ✅ 자동 코드 링크 생성 (Notion Code URL이 있으면 그걸 우선)
+function makeCodeLink({ boj, algos, explicitCodeUrl }) {
+  if (explicitCodeUrl) return explicitCodeUrl;
+
+  if (!CODE_REPO_URL) return null; // env 설정 안 했으면 링크 생성 안 함
+  if (!boj) return null;
+
+  const list = (algos && algos.length) ? algos : ["etc"];
+  const algo0 = list[0] ?? "etc";
+  const folder = algoFolder(algo0);
+
+  // 기본: C++ 파일로 가정
+  return `${CODE_REPO_URL}/blob/${CODE_REPO_BRANCH}/${folder}/${boj}.cpp`;
+}
+
+// ✅ 문제 md에 코드 링크를 “보이는 형태”로 삽입
+function injectCodeSection(md, codeUrl) {
+  if (!codeUrl) return md;
+
+  const block =
+    `\n\n---\n` +
+    `## 🔗 Solution Code\n` +
+    `- ${codeUrl}\n`;
+
+  return md + block + "\n";
+}
+
 async function buildMarkdown(page) {
   const title = getTitle(page);
   const boj = getNumber(page, COL.number);
@@ -151,7 +189,8 @@ async function buildMarkdown(page) {
   const algos = getMulti(page, COL.algos);
   const date = getDate(page, COL.date);
 
-  const lastEdited = page.last_edited_time; // fallback sorting용
+  // Notion에서 직접 넣은 코드 링크가 있으면 그걸 쓰게 함
+  const explicitCodeUrl = getUrl(page, COL.codeUrl);
 
   const fm = [
     "---",
@@ -165,64 +204,36 @@ async function buildMarkdown(page) {
   ].join("\n");
 
   const mdBlocks = await n2m.pageToMarkdown(page.id);
-  const md = n2m.toMarkdownString(mdBlocks)?.parent ?? "";
+  const mdBody = n2m.toMarkdownString(mdBlocks)?.parent ?? "";
 
-  return {
-    title,
-    boj,
-    tier,
-    date,
-    algos,
-    lastEdited,
-    content: fm + md + "\n",
-  };
+  const codeUrl = makeCodeLink({ boj, algos, explicitCodeUrl });
+
+  // ✅ 본문 끝에 코드 링크 섹션 붙이기
+  const finalMd = injectCodeSection(fm + mdBody, codeUrl);
+
+  return { title, boj, tier, date, algos, codeUrl, content: finalMd + "\n" };
 }
 
-function toTable(header, rows) {
-  return [header, ...rows].join("\n");
-}
-
-function safeBojStr(boj) {
-  if (boj === null || boj === undefined) return "unknown";
-  return String(boj);
-}
-
-function makeReadmeAuto(stats, algoEntries) {
-  // ✅ Algorithm Index (바로가기)
-  const algoIndexRows = [...algoEntries.entries()]
-    .sort((a, b) => b[1].length - a[1].length)
-    .map(([algo, entries]) => {
-      const slug = algoFolder(algo);
-      return `| [${algo}](docs/baekjoon/${slug}/index.md) | ${entries.length} |`;
-    });
-
-  const algoIndexTable = toTable(
-    `## Algorithm Index
-| Algorithm | Count |
-|---|---:|`,
-    algoIndexRows.length ? algoIndexRows : ["| - | 0 |"]
-  );
-
-  // ✅ Tier Table
+function makeReadmeAuto(stats) {
   const tierRows = [...stats.byTier.entries()]
     .sort((a, b) => tierScore(b[0]) - tierScore(a[0]))
     .map(([tier, cnt]) => `| ${tier} | ${cnt} |`);
 
-  // ✅ Algorithm Count Table
   const algoRows = [...stats.byAlgo.entries()]
     .sort((a, b) => b[1] - a[1])
     .map(([algo, cnt]) => `| ${algo} | ${cnt} |`);
 
-  // ✅ Latest Table
   const latestRows = stats.latest.map((x) => {
     const bojStr = safeBojStr(x.boj);
     const problemLink = x.boj ? `https://www.acmicpc.net/problem/${x.boj}` : null;
 
     const bojCell = problemLink ? `[${bojStr}](${problemLink})` : bojStr;
-    const titleCell = `[${x.title}](docs/baekjoon/problems/${bojStr}.md)`;
+    const writeupCell = `[${x.title}](docs/baekjoon/problems/${bojStr}.md)`;
     const algostr = (x.algos ?? []).join(", ");
 
-    return `| ${bojCell} | ${titleCell} | ${x.tier ?? ""} | ${algostr} | ${x.date ?? ""} |`;
+    const codeCell = x.codeUrl ? `[code](${x.codeUrl})` : "";
+
+    return `| ${bojCell} | ${writeupCell} | ${x.tier ?? ""} | ${algostr} | ${codeCell} | ${x.date ?? ""} |`;
   });
 
   const tierTable = toTable(
@@ -241,13 +252,19 @@ function makeReadmeAuto(stats, algoEntries) {
 
   const latestTable = toTable(
     `## Latest (Top 10)
-| BOJ | Write-up | Tier | Algorithms | Date |
-|---:|---|---|---|---|`,
-    latestRows.length ? latestRows : ["| - | - | - | - | - |"]
+| BOJ | Write-up | Tier | Algorithms | Code | Date |
+|---:|---|---|---|---|---|`,
+    latestRows.length ? latestRows : ["| - | - | - | - | - | - |"]
   );
 
+  // ✅ 코드 레포 버튼(있을 때만)
+  const codeRepoLine = CODE_REPO_URL
+    ? `- Code repo: **${CODE_REPO_URL}**`
+    : `- Code repo: (set \`CODE_REPO_URL\` to show link)`;
+
   return `
-${algoIndexTable}
+## Links
+${codeRepoLine}
 
 ## Stats
 - Total published: **${stats.total}**
@@ -261,7 +278,7 @@ ${latestTable}
 }
 
 function makeAlgoIndex(algoName, entries) {
-  const sorted = [...entries].sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+  const sorted = [...entries].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
 
   const rows = sorted.map((x) => {
     const bojStr = safeBojStr(x.boj);
@@ -269,14 +286,14 @@ function makeAlgoIndex(algoName, entries) {
 
     const bojCell = problemLink ? `[${bojStr}](${problemLink})` : bojStr;
     const titleCell = `[${x.title}](../problems/${bojStr}.md)`;
-    const algostr = (x.algos ?? []).join(", ");
+    const codeCell = x.codeUrl ? `[code](${x.codeUrl})` : "";
 
-    return `| ${bojCell} | ${titleCell} | ${x.tier ?? ""} | ${algostr} | ${x.date ?? ""} |`;
+    return `| ${bojCell} | ${titleCell} | ${x.tier ?? ""} | ${codeCell} | ${x.date ?? ""} |`;
   });
 
   return `# ${algoName}
 
-| BOJ | Title | Tier | Algorithms | Date |
+| BOJ | Title | Tier | Code | Date |
 |---:|---|---|---|---|
 ${rows.length ? rows.join("\n") : "| - | - | - | - | - |"}
 `;
@@ -292,73 +309,55 @@ async function main() {
     total: 0,
     byAlgo: new Map(),
     byTier: new Map(),
-    latest: [],
+    latest: [], // {boj,title,tier,algos,date,codeUrl}
   };
 
-  const algoEntries = new Map();
+  const algoEntries = new Map(); // algo -> [{boj,title,tier,date,codeUrl}]
 
   if (pages.length === 0) {
     console.log("No Published pages found.");
-    upsertAutoSection(README_PATH, makeReadmeAuto(stats, algoEntries));
+    upsertAutoSection(README_PATH, makeReadmeAuto(stats));
     return;
   }
 
   for (const page of pages) {
     if (!getCheck(page, COL.published)) continue;
 
-    const { title, boj, tier, date, algos, lastEdited, content } =
-      await buildMarkdown(page);
-
-    // ✅ BOJ 번호 없는 페이지는 스킵 (unknown.md 덮어쓰기 방지)
-    if (boj === null || boj === undefined) {
-      console.log(`Skipped (missing BOJ number): ${title}`);
-      continue;
-    }
+    const { title, boj, tier, date, algos, codeUrl, content } = await buildMarkdown(page);
 
     const bojStr = safeBojStr(boj);
     const algoList = (algos && algos.length) ? algos : ["etc"];
 
-    // 1) problems/에 저장
-    const problemPath = path.join(PROBLEMS_DIR, `${bojStr}.md`);
-    fs.writeFileSync(problemPath, content, "utf8");
+    // ✅ problems/에 문제 파일은 1개만 생성
+    fs.writeFileSync(path.join(PROBLEMS_DIR, `${bojStr}.md`), content, "utf8");
 
-    // 2) 통계 집계
+    // stats
     stats.total++;
     if (tier) stats.byTier.set(tier, (stats.byTier.get(tier) ?? 0) + 1);
 
     for (const a of algoList) {
       stats.byAlgo.set(a, (stats.byAlgo.get(a) ?? 0) + 1);
-
       if (!algoEntries.has(a)) algoEntries.set(a, []);
-      algoEntries.get(a).push({
-        boj,
-        title,
-        tier,
-        date,
-        lastEdited,
-        algos: algoList,
-      });
+      algoEntries.get(a).push({ boj, title, tier, date, codeUrl });
     }
 
-    // 3) 최신 목록
-    stats.latest.push({ boj, title, tier, algos: algoList, date, lastEdited });
+    stats.latest.push({ boj, title, tier, algos: algoList, date, codeUrl });
 
     console.log(`✓ ${bojStr} ${title} -> ${algoList.join(", ")}`);
   }
 
-  // ✅ 최신 10개 (date 우선, 없으면 lastEdited)
-  stats.latest.sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+  // 최신 10개
+  stats.latest.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
   stats.latest = stats.latest.slice(0, 10);
 
-  // README 자동영역 갱신 (Algorithm Index 포함)
-  upsertAutoSection(README_PATH, makeReadmeAuto(stats, algoEntries));
+  // README 자동영역 갱신
+  upsertAutoSection(README_PATH, makeReadmeAuto(stats));
 
   // 알고리즘별 index.md 생성
   for (const [algo, entries] of algoEntries.entries()) {
     const dir = path.join(ROOT, algoFolder(algo));
     ensureDir(dir);
-    const indexPath = path.join(dir, "index.md");
-    fs.writeFileSync(indexPath, makeAlgoIndex(algo, entries), "utf8");
+    fs.writeFileSync(path.join(dir, "index.md"), makeAlgoIndex(algo, entries), "utf8");
   }
 
   console.log("Done.");
