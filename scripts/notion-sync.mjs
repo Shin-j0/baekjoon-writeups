@@ -85,15 +85,19 @@ function tierScore(tier) {
     GOLD: 400,
     PLATINUM: 500,
     DIAMOND: 600,
-    RUBY: 700, // 혹시 생기면
+    RUBY: 700,
   };
 
   const base = baseMap[name] ?? 0;
   if (!base || !Number.isFinite(level)) return -1;
 
   // 1이 가장 높고 5가 가장 낮게 보이도록 (같은 티어 내)
-  // GOLD 1 > GOLD 2 > ... > GOLD 5
   return base + (6 - level);
+}
+
+// date가 있으면 date, 없으면 lastEdited로 정렬
+function sortKey(x) {
+  return x?.date ?? x?.lastEdited ?? "";
 }
 
 async function queryPublishedPages() {
@@ -118,8 +122,6 @@ async function queryPublishedPages() {
 
 /**
  * README에서 자동 영역만 갱신(전체 덮어쓰기 X)
- * - 마커가 있으면 그 사이만 교체
- * - 마커가 없으면 맨 아래에 블록 추가
  */
 function upsertAutoSection(readmePath, autoContent) {
   const start = "<!-- AUTO-GENERATED:START -->";
@@ -149,6 +151,8 @@ async function buildMarkdown(page) {
   const algos = getMulti(page, COL.algos);
   const date = getDate(page, COL.date);
 
+  const lastEdited = page.last_edited_time; // fallback sorting용
+
   const fm = [
     "---",
     `title: ${yamlValue(title)}`,
@@ -163,7 +167,15 @@ async function buildMarkdown(page) {
   const mdBlocks = await n2m.pageToMarkdown(page.id);
   const md = n2m.toMarkdownString(mdBlocks)?.parent ?? "";
 
-  return { title, boj, tier, date, algos, content: fm + md + "\n" };
+  return {
+    title,
+    boj,
+    tier,
+    date,
+    algos,
+    lastEdited,
+    content: fm + md + "\n",
+  };
 }
 
 function toTable(header, rows) {
@@ -175,15 +187,33 @@ function safeBojStr(boj) {
   return String(boj);
 }
 
-function makeReadmeAuto(stats) {
+function makeReadmeAuto(stats, algoEntries) {
+  // ✅ Algorithm Index (바로가기)
+  const algoIndexRows = [...algoEntries.entries()]
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([algo, entries]) => {
+      const slug = algoFolder(algo);
+      return `| [${algo}](docs/baekjoon/${slug}/index.md) | ${entries.length} |`;
+    });
+
+  const algoIndexTable = toTable(
+    `## Algorithm Index
+| Algorithm | Count |
+|---|---:|`,
+    algoIndexRows.length ? algoIndexRows : ["| - | 0 |"]
+  );
+
+  // ✅ Tier Table
   const tierRows = [...stats.byTier.entries()]
     .sort((a, b) => tierScore(b[0]) - tierScore(a[0]))
     .map(([tier, cnt]) => `| ${tier} | ${cnt} |`);
 
+  // ✅ Algorithm Count Table
   const algoRows = [...stats.byAlgo.entries()]
     .sort((a, b) => b[1] - a[1])
     .map(([algo, cnt]) => `| ${algo} | ${cnt} |`);
 
+  // ✅ Latest Table
   const latestRows = stats.latest.map((x) => {
     const bojStr = safeBojStr(x.boj);
     const problemLink = x.boj ? `https://www.acmicpc.net/problem/${x.boj}` : null;
@@ -217,6 +247,8 @@ function makeReadmeAuto(stats) {
   );
 
   return `
+${algoIndexTable}
+
 ## Stats
 - Total published: **${stats.total}**
 
@@ -229,9 +261,7 @@ ${latestTable}
 }
 
 function makeAlgoIndex(algoName, entries) {
-  // entries: [{boj,title,tier,date}]
-  // 최신순(날짜)
-  const sorted = [...entries].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+  const sorted = [...entries].sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
 
   const rows = sorted.map((x) => {
     const bojStr = safeBojStr(x.boj);
@@ -239,15 +269,16 @@ function makeAlgoIndex(algoName, entries) {
 
     const bojCell = problemLink ? `[${bojStr}](${problemLink})` : bojStr;
     const titleCell = `[${x.title}](../problems/${bojStr}.md)`;
+    const algostr = (x.algos ?? []).join(", ");
 
-    return `| ${bojCell} | ${titleCell} | ${x.tier ?? ""} | ${x.date ?? ""} |`;
+    return `| ${bojCell} | ${titleCell} | ${x.tier ?? ""} | ${algostr} | ${x.date ?? ""} |`;
   });
 
   return `# ${algoName}
 
-| BOJ | Title | Tier | Date |
-|---:|---|---|---|
-${rows.length ? rows.join("\n") : "| - | - | - | - |"}
+| BOJ | Title | Tier | Algorithms | Date |
+|---:|---|---|---|---|
+${rows.length ? rows.join("\n") : "| - | - | - | - | - |"}
 `;
 }
 
@@ -257,31 +288,37 @@ async function main() {
 
   const pages = await queryPublishedPages();
 
-  // 통계 + 인덱스용 데이터
   const stats = {
     total: 0,
-    byAlgo: new Map(), // algo -> count
-    byTier: new Map(), // tier -> count
-    latest: [], // {boj,title,tier,algos,date}
+    byAlgo: new Map(),
+    byTier: new Map(),
+    latest: [],
   };
 
-  const algoEntries = new Map(); // algo -> [{boj,title,tier,date}]
+  const algoEntries = new Map();
 
   if (pages.length === 0) {
     console.log("No Published pages found.");
-    upsertAutoSection(README_PATH, makeReadmeAuto(stats));
+    upsertAutoSection(README_PATH, makeReadmeAuto(stats, algoEntries));
     return;
   }
 
   for (const page of pages) {
     if (!getCheck(page, COL.published)) continue;
 
-    const { title, boj, tier, date, algos, content } = await buildMarkdown(page);
+    const { title, boj, tier, date, algos, lastEdited, content } =
+      await buildMarkdown(page);
+
+    // ✅ BOJ 번호 없는 페이지는 스킵 (unknown.md 덮어쓰기 방지)
+    if (boj === null || boj === undefined) {
+      console.log(`Skipped (missing BOJ number): ${title}`);
+      continue;
+    }
 
     const bojStr = safeBojStr(boj);
     const algoList = (algos && algos.length) ? algos : ["etc"];
 
-    // 1) problems/에 딱 한 번만 저장
+    // 1) problems/에 저장
     const problemPath = path.join(PROBLEMS_DIR, `${bojStr}.md`);
     fs.writeFileSync(problemPath, content, "utf8");
 
@@ -293,21 +330,28 @@ async function main() {
       stats.byAlgo.set(a, (stats.byAlgo.get(a) ?? 0) + 1);
 
       if (!algoEntries.has(a)) algoEntries.set(a, []);
-      algoEntries.get(a).push({ boj, title, tier, date });
+      algoEntries.get(a).push({
+        boj,
+        title,
+        tier,
+        date,
+        lastEdited,
+        algos: algoList,
+      });
     }
 
     // 3) 최신 목록
-    stats.latest.push({ boj, title, tier, algos: algoList, date });
+    stats.latest.push({ boj, title, tier, algos: algoList, date, lastEdited });
 
     console.log(`✓ ${bojStr} ${title} -> ${algoList.join(", ")}`);
   }
 
-  // 최신 10개 (날짜 기준)
-  stats.latest.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+  // ✅ 최신 10개 (date 우선, 없으면 lastEdited)
+  stats.latest.sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
   stats.latest = stats.latest.slice(0, 10);
 
-  // README 자동영역 갱신
-  upsertAutoSection(README_PATH, makeReadmeAuto(stats));
+  // README 자동영역 갱신 (Algorithm Index 포함)
+  upsertAutoSection(README_PATH, makeReadmeAuto(stats, algoEntries));
 
   // 알고리즘별 index.md 생성
   for (const [algo, entries] of algoEntries.entries()) {
