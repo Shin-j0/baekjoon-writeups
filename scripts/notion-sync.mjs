@@ -162,12 +162,8 @@ function makeCodeLink({ boj, algos, explicitCodeUrl }) {
   if (!CODE_REPO_URL) return null; // env 설정 안 했으면 링크 생성 안 함
   if (!boj) return null;
 
-  const list = (algos && algos.length) ? algos : ["etc"];
-  const algo0 = list[0] ?? "etc";
-  const folder = algoFolder(algo0);
-
   // 기본: C++ 파일로 가정
-  return `${CODE_REPO_URL}/blob/${CODE_REPO_BRANCH}/${folder}/${boj}.cpp`;
+  return `${CODE_REPO_URL}/blob/${CODE_REPO_BRANCH}/cpp/src/${boj}.cpp`;
 }
 
 // ✅ 문제 md에 코드 링크를 “보이는 형태”로 삽입
