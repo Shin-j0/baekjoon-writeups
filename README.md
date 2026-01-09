@@ -94,7 +94,7 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 - Code repo: **https://github.com/Shin-j0/baekjoon-solutions**
 
 ## Stats
-- Total published: **20**
+- Total published: **21**
 
 ### By Tier
 | Tier | Count |
@@ -102,14 +102,14 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 | GOLD 4 | 2 |
 | GOLD 5 | 6 |
 | SILVER 1 | 6 |
-| SILVER 2 | 3 |
+| SILVER 2 | 4 |
 | SILVER 3 | 3 |
 
 ### By Algorithm
 | Algorithm | Count |
 |---|---:|
-| BFS | 8 |
-| DFS | 8 |
+| BFS | 9 |
+| DFS | 9 |
 | DP | 4 |
 | Priority Queue | 3 |
 | Que | 2 |
@@ -125,6 +125,7 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 ## Latest (Top 10)
 | BOJ | Write-up | Tier | Algorithms | Code | Date |
 |---:|---|---|---|---|---|
+| [21736](https://www.acmicpc.net/problem/21736) | [헌내기는 친구가 필요해](docs/baekjoon/problems/21736.md) | SILVER 2 | BFS, DFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/21736.cpp) | 2026-01-09 |
 | [1753](https://www.acmicpc.net/problem/1753) | [최단 경로](docs/baekjoon/problems/1753.md) | GOLD 4 | Dijkstra, Graph | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/1753.cpp) | 2026-01-08 |
 | [12865](https://www.acmicpc.net/problem/12865) | [평범한 배낭](docs/baekjoon/problems/12865.md) | GOLD 5 | DP | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/12865.cpp) | 2026-01-05 |
 | [17626](https://www.acmicpc.net/problem/17626) | [Four Squares](docs/baekjoon/problems/17626.md) | SILVER 3 | DP | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/17626.cpp) | 2026-01-03 |
@@ -134,5 +135,4 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 | [11729](https://www.acmicpc.net/problem/11729) | [절대값 힙](docs/baekjoon/problems/11729.md) | SILVER 1 | Heap, Priority Queue | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/11729.cpp) | 2025-12-30 |
 | [11279](https://www.acmicpc.net/problem/11279) | [최대 힙](docs/baekjoon/problems/11279.md) | SILVER 2 | Heap, Priority Queue | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/11279.cpp) | 2025-12-29 |
 | [7662](https://www.acmicpc.net/problem/7662) | [이중 우선순위 큐](docs/baekjoon/problems/7662.md) | GOLD 4 | Priority Queue, Map | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/7662.cpp) | 2025-12-28 |
-| [7576](https://www.acmicpc.net/problem/7576) | [토마토](docs/baekjoon/problems/7576.md) | GOLD 5 | BFS, DFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/7576.cpp) | 2025-12-28 |
 <!-- AUTO-GENERATED:END -->
