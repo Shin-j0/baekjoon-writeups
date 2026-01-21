@@ -94,12 +94,12 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 - Code repo: **https://github.com/Shin-j0/baekjoon-solutions**
 
 ## Stats
-- Total published: **24**
+- Total published: **25**
 
 ### By Tier
 | Tier | Count |
 |---|---:|
-| GOLD 4 | 3 |
+| GOLD 4 | 4 |
 | GOLD 5 | 7 |
 | SILVER 1 | 6 |
 | SILVER 2 | 5 |
@@ -108,15 +108,15 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 ### By Algorithm
 | Algorithm | Count |
 |---|---:|
-| BFS | 11 |
+| BFS | 12 |
 | DFS | 9 |
 | DP | 4 |
 | Priority Queue | 3 |
+| Graph | 2 |
 | Greedy | 2 |
 | Que | 2 |
 | Heap | 2 |
 | Dijkstra | 1 |
-| Graph | 1 |
 | Map | 1 |
 | Deque | 1 |
 | Divide and Conquer | 1 |
@@ -125,6 +125,7 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 ## Latest (Top 10)
 | BOJ | Write-up | Tier | Algorithms | Code | Date |
 |---:|---|---|---|---|---|
+| [1043](https://www.acmicpc.net/problem/1043) | [거짓말](docs/baekjoon/problems/1043.md) | GOLD 4 | BFS, Graph | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/1043.cpp) | 2026-01-22 |
 | [16928](https://www.acmicpc.net/problem/16928) | [뱀과 사다리 게임](docs/baekjoon/problems/16928.md) | GOLD 5 | BFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/16928.cpp) | 2026-01-19 |
 | [1541](https://www.acmicpc.net/problem/1541) | [잃어버린 괄호](docs/baekjoon/problems/1541.md) | SILVER 2 | Greedy | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/1541.cpp) | 2026-01-11 |
 | [9019](https://www.acmicpc.net/problem/9019) | [DSLR](docs/baekjoon/problems/9019.md) | GOLD 4 | BFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/9019.cpp) | 2026-01-11 |
@@ -134,5 +135,4 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 | [17626](https://www.acmicpc.net/problem/17626) | [Four Squares](docs/baekjoon/problems/17626.md) | SILVER 3 | DP | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/17626.cpp) | 2026-01-03 |
 | [11403](https://www.acmicpc.net/problem/11403) | [경로 찾기](docs/baekjoon/problems/11403.md) | SILVER 1 | BFS, DFS, Que | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/11403.cpp) | 2026-01-02 |
 | [11727](https://www.acmicpc.net/problem/11727) | [2xn 타일링2](docs/baekjoon/problems/11727.md) | SILVER 3 | DP | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/11727.cpp) | 2025-12-31 |
-| [10026](https://www.acmicpc.net/problem/10026) | [적록색약](docs/baekjoon/problems/10026.md) | GOLD 5 | BFS, DFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/10026.cpp) | 2025-12-30 |
 <!-- AUTO-GENERATED:END -->

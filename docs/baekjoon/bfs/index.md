@@ -2,6 +2,7 @@
 
 | BOJ | Title | Tier | Code | Date |
 |---:|---|---|---|---|
+| [1043](https://www.acmicpc.net/problem/1043) | [거짓말](../problems/1043.md) | GOLD 4 | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/1043.cpp) | 2026-01-22 |
 | [16928](https://www.acmicpc.net/problem/16928) | [뱀과 사다리 게임](../problems/16928.md) | GOLD 5 | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/16928.cpp) | 2026-01-19 |
 | [9019](https://www.acmicpc.net/problem/9019) | [DSLR](../problems/9019.md) | GOLD 4 | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/9019.cpp) | 2026-01-11 |
 | [21736](https://www.acmicpc.net/problem/21736) | [헌내기는 친구가 필요해](../problems/21736.md) | SILVER 2 | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/21736.cpp) | 2026-01-09 |
