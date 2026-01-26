@@ -94,13 +94,13 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 - Code repo: **https://github.com/Shin-j0/baekjoon-solutions**
 
 ## Stats
-- Total published: **26**
+- Total published: **27**
 
 ### By Tier
 | Tier | Count |
 |---|---:|
 | GOLD 4 | 4 |
-| GOLD 5 | 7 |
+| GOLD 5 | 8 |
 | SILVER 1 | 7 |
 | SILVER 2 | 5 |
 | SILVER 3 | 3 |
@@ -116,6 +116,8 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 | Greedy | 2 |
 | Que | 2 |
 | Heap | 2 |
+| Burte force | 1 |
+| Implementation | 1 |
 | String | 1 |
 | Dijkstra | 1 |
 | Map | 1 |
@@ -126,6 +128,7 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 ## Latest (Top 10)
 | BOJ | Write-up | Tier | Algorithms | Code | Date |
 |---:|---|---|---|---|---|
+| [14500](https://www.acmicpc.net/problem/14500) | [테트로미노](docs/baekjoon/problems/14500.md) | GOLD 5 | Burte force, Implementation | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/14500.cpp) | 2026-01-26 |
 | [5525](https://www.acmicpc.net/problem/5525) | [IOI](docs/baekjoon/problems/5525.md) | SILVER 1 | String | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/5525.cpp) | 2026-01-25 |
 | [1043](https://www.acmicpc.net/problem/1043) | [거짓말](docs/baekjoon/problems/1043.md) | GOLD 4 | BFS, Graph | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/1043.cpp) | 2026-01-22 |
 | [16928](https://www.acmicpc.net/problem/16928) | [뱀과 사다리 게임](docs/baekjoon/problems/16928.md) | GOLD 5 | BFS | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/16928.cpp) | 2026-01-19 |
@@ -135,5 +138,4 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 | [1753](https://www.acmicpc.net/problem/1753) | [최단 경로](docs/baekjoon/problems/1753.md) | GOLD 4 | Dijkstra, Graph | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/1753.cpp) | 2026-01-08 |
 | [12865](https://www.acmicpc.net/problem/12865) | [평범한 배낭](docs/baekjoon/problems/12865.md) | GOLD 5 | DP | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/12865.cpp) | 2026-01-05 |
 | [17626](https://www.acmicpc.net/problem/17626) | [Four Squares](docs/baekjoon/problems/17626.md) | SILVER 3 | DP | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/17626.cpp) | 2026-01-03 |
-| [11403](https://www.acmicpc.net/problem/11403) | [경로 찾기](docs/baekjoon/problems/11403.md) | SILVER 1 | BFS, DFS, Que | [code](https://github.com/Shin-j0/baekjoon-solutions/blob/main/cpp/src/11403.cpp) | 2026-01-02 |
 <!-- AUTO-GENERATED:END -->
