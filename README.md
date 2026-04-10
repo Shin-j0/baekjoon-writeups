@@ -112,19 +112,19 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 | BFS | 13 |
 | DFS | 9 |
 | DP | 4 |
-| Graph | 3 |
 | Priority Queue | 3 |
+| Graph | 3 |
 | Burte force | 2 |
 | Implementation | 2 |
 | Greedy | 2 |
 | Que | 2 |
 | Heap | 2 |
-| String | 1 |
-| Dijkstra | 1 |
-| Map | 1 |
-| Deque | 1 |
-| Divide and Conquer | 1 |
 | Binary Search | 1 |
+| Divide and Conquer | 1 |
+| Deque | 1 |
+| Map | 1 |
+| Dijkstra | 1 |
+| String | 1 |
 
 ## Latest (Top 10)
 | BOJ | Write-up | Tier | Algorithms | Code | Date |
