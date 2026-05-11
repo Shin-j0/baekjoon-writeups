@@ -122,9 +122,9 @@ Notion에 정리한 **백준(BOJ) 알고리즘 풀이를 GitHub로 자동 동기
 | String | 1 |
 | Dijkstra | 1 |
 | Map | 1 |
-| Deque | 1 |
 | Divide and Conquer | 1 |
 | Binary Search | 1 |
+| Deque | 1 |
 
 ## Latest (Top 10)
 | BOJ | Write-up | Tier | Algorithms | Code | Date |
